@@ -4,7 +4,7 @@
 #include <omp.h>
 #include <assert.h>
 #include "GraphUtils.h"
-#include "ParaTrineGraph.hpp"
+#include "TreeBuildIndex.hpp"
 #define frac 0.98
 
 typedef int vid_t;
@@ -42,13 +42,13 @@ public:
         std::vector<int> deg(g.GetNodeNum());
         
         PKC(&g, deg.data());
-        ParaTrineGraph pg(g, (uint32_t *)deg.data());
+        TreeBuildIndex pg(g, (uint32_t *)deg.data());
         int n = pg.g.GetNodeNum();
         tid_ = VI(n, -1);
         VI tag(n, -1);
         WaitFreeRankDSU dsu_(n, pg.rank_);
 
-        int k = pg.max_trine;
+        int k = pg.max_level;
         int start = pg.bin_[k], end = pg.bin_[k + 1];
 #pragma omp parallel
         {
@@ -62,10 +62,10 @@ public:
                     int u = pg.seq_[i];
                     for (int v : pg.g[u])
                     {
-                        if (pg.get_coreness(v) >= k)
+                        if (pg.get_level(v) >= k)
                         {
                             int pivot = dsu_.get_pivot(v);
-                            if (pg.get_coreness(pivot) != k)
+                            if (pg.get_level(pivot) != k)
                             {
                                 int t = tag[pivot];
                                 if (t != k && my_compare_swap(&tag[pivot], t, k) == t)

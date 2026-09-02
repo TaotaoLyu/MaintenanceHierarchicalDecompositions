@@ -1,6 +1,6 @@
 #include "TrineTree.hpp"
 #include "AlgoProfile.hpp"
-#include "ParaTrineGraph.hpp"
+#include "TreeBuildIndex.hpp"
 #include <queue>
 
 namespace TrineTree
@@ -23,13 +23,13 @@ namespace TrineTree
     {
         omp_set_num_threads(thread_num);
 
-        ParaTrineGraph pg(g_, trine_.GetTriness().data());
+        TreeBuildIndex pg(g_, trine_.GetTriness().data());
 
         int n = pg.g.GetNodeNum(); // modify
         tid_ = std::vector<uint32_t>(n, -1);
         VI tag(n, -1);
         WaitFreeRankDSU dsu_(n, pg.rank_);
-        int k = pg.max_trine;
+        int k = pg.max_level;
         int start = pg.bin_[k], end = pg.bin_[k + 1];
 #pragma omp parallel
         {
@@ -43,10 +43,10 @@ namespace TrineTree
                     int u = pg.seq_[i];
                     for (int v : pg.g[u]) // modify
                     {
-                        if (pg.get_coreness(v) >= k)
+                        if (pg.get_level(v) >= k)
                         {
                             int pivot = dsu_.get_pivot(v);
-                            if (pg.get_coreness(pivot) != k)
+                            if (pg.get_level(pivot) != k)
                             {
                                 int t = tag[pivot];
                                 if (t != k && my_compare_swap(&tag[pivot], t, k) == t)
@@ -447,7 +447,7 @@ namespace TrineTree
             merged_bucket[i].swap(k_vedge);
         }
 
-        ParaTrineGraph pg(g_, trine_.GetTriness().data());
+        TreeBuildIndex pg(g_, trine_.GetTriness().data());
 
         WaitFreeRankDSU dsu_(g_.GetNodeNum(), pg.rank_);
         std::vector<int> visted(t_.size());
@@ -869,7 +869,7 @@ namespace TrineTree
 
         s1 = AlgoProfile::CaptureClock();
 
-        ParaTrineGraph pg(g_, trine_.GetTriness().data());
+        TreeBuildIndex pg(g_, trine_.GetTriness().data());
 
         std::vector<uint32_t> change_ver;
         for (int i = 0; i < g_.GetNodeNum(); ++i)
