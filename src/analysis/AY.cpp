@@ -51,7 +51,7 @@ std::vector<CompRecord> __compute_metric_para(ParaCoreTree & pt, score_f f)
 }
 
 
-std::vector<CompRecord> __compute_metric_para(TrineTree::ParaTrineTree & pt, score_f f)
+std::vector<CompRecord> __compute_metric_para(Tree::Tree & pt, score_f f)
 {
     std::vector<int> trine(pt.g_.GetNodeNum());
 	for(auto e:pt.t_)
@@ -190,7 +190,7 @@ std::vector<CompRecord> get_cc_para(ParaCoreTree & pt)
 }
 
 
-std::vector<CompRecord> get_cc_para(TrineTree::ParaTrineTree & pt)
+std::vector<CompRecord> get_cc_para(Tree::Tree & pt)
 {
     std::vector<int> trine(pt.g_.GetNodeNum());
 	for(auto e:pt.t_)

@@ -27,7 +27,7 @@ add_library(mhd_core STATIC
     src/tree/TreeBuildIndex.cpp
     src/profile/AlgoProfile.cpp
     models/trine/Trine.cpp
-    src/tree/TrineTree.cpp
+    src/tree/Tree.cpp
     models/trine/detail/order.cpp
     models/trine/detail/thebin.cpp
     models/trine/detail/theheap.cpp
@@ -40,7 +40,7 @@ add_library(mhd_core STATIC
     utils/GraphUtils.h
     include/profile/AlgoProfile.hpp
     models/trine/Trine.hpp
-    include/tree/TrineTree.hpp
+    include/tree/Tree.hpp
     models/trine/detail/defs.h
     models/trine/detail/order.h
     models/trine/detail/thebin.h

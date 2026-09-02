@@ -1,9 +1,9 @@
-#include "TrineTree.hpp"
+#include "Tree.hpp"
 #include "AlgoProfile.hpp"
 #include "TreeBuildIndex.hpp"
 #include <queue>
 
-namespace TrineTree
+namespace Tree
 {
     int thread_num = 32;
 
@@ -12,14 +12,14 @@ namespace TrineTree
         return std::chrono::duration_cast<std::chrono::duration<double>>(t - s).count();
     }
 
-    void ParaTrineTree::SetThreadNum(int num)
+    void Tree::SetThreadNum(int num)
     {
         if (num <= 0)
             return;
         thread_num = num;
     }
 
-    void ParaTrineTree::Build()
+    void Tree::Build()
     {
         omp_set_num_threads(thread_num);
 
@@ -65,7 +65,7 @@ namespace TrineTree
                     int v = pg.seq_[i];
                     if (dsu_.get_pivot(v) != v)
                         continue;
-                    TrineTreeNode *newv = new TrineTreeNode;
+                    TreeNode *newv = new TreeNode;
                     newv->k = k;
                     newv->pa = -1;
 #pragma omp critical
@@ -165,7 +165,7 @@ namespace TrineTree
             }
         }
     }
-    void ParaTrineTree::PrintTree()
+    void Tree::PrintTree()
     {
         printf("=============================================\n");
         for (int i = 0; i < t_.size(); ++i)
@@ -185,7 +185,7 @@ namespace TrineTree
         }
         printf("=============================================\n");
     }
-    // void ParaTrineTree::dfs(std::vector<int> &Jump, int t, int v)
+    // void Tree::dfs(std::vector<int> &Jump, int t, int v)
     // {
     //     if (t < Jump.size())
     //     {
@@ -196,12 +196,12 @@ namespace TrineTree
     //         dfs(Jump, e, v);
     // }
 
-    void ParaTrineTree::MoveToNewTid(std::vector<int> &changever, std::vector<int> &old_tid, std::vector<int> &old_trine)
+    void Tree::MoveToNewTid(std::vector<int> &changever, std::vector<int> &old_tid, std::vector<int> &old_trine)
     {
         std::vector<std::vector<bool>> need_erase_vertex(thread_num, std::vector<bool>(t_.size()));
 
         // printf("p1\n");
-        std::vector<TrineTreeNode *> copy_t_;
+        std::vector<TreeNode *> copy_t_;
         copy_t_.resize(t_.size());
 #pragma omp parallel for
         for (int i = 0; i < t_.size(); ++i)
@@ -221,7 +221,7 @@ namespace TrineTree
                 need_erase_vertex[cur_p][tid_[i]] = true;
 
                 // printf("hello\n");
-                auto p = new TrineTreeNode;
+                auto p = new TreeNode;
                 p->vertex_.push_back(i);
                 p->k = trine_[i];
                 p->pa = -1;
@@ -279,7 +279,7 @@ namespace TrineTree
         }
     }
 
-    void ParaTrineTree::AddChildren()
+    void Tree::AddChildren()
     {
         int tn = (int)t_.size();
         VVI bin_private = VVI(thread_num, VI(tn, 0));
@@ -316,7 +316,7 @@ namespace TrineTree
         }
     }
 
-    void ParaTrineTree::Merge(TrineTreeNode *dst, TrineTreeNode *src)
+    void Tree::Merge(TreeNode *dst, TreeNode *src)
     {
         // for (auto e : src->child_)
         // 	dst->child_.push_back(e);
@@ -340,7 +340,7 @@ namespace TrineTree
         src->child_.clear();
         src->vertex_.clear();
     }
-    void ParaTrineTree::InsertEdge(const EdgListT &edg, bool flag,bool flag1)
+    void Tree::InsertEdge(const EdgListT &edg, bool flag,bool flag1)
     {
         omp_set_num_threads(thread_num);
 
@@ -676,7 +676,7 @@ namespace TrineTree
         AlgoProfile::GetInstance()->SetInsertTime(s1, s2);
     }
 
-    std::pair<int, int> ParaTrineTree::GenrateTask(int v)
+    std::pair<int, int> Tree::GenrateTask(int v)
     {
         int new_v_trine = trine_[v];
         int tid = tid_[v];
@@ -695,7 +695,7 @@ namespace TrineTree
         else
             return {cur, new_v_trine};
     }
-    int ParaTrineTree::FindCorrectTid(int v)
+    int Tree::FindCorrectTid(int v)
     {
         int k = trine_[v];
         int cur = tid_[v];
@@ -708,7 +708,7 @@ namespace TrineTree
         return cur;
     }
 
-    void ParaTrineTree::CreateNewNode(const std::vector<uint32_t> &change_ver)
+    void Tree::CreateNewNode(const std::vector<uint32_t> &change_ver)
     {
         // printf("old node num: %d\n",t_.size());
         std::vector<std::set<int>> t_task(t_.size()); // modify
@@ -736,7 +736,7 @@ namespace TrineTree
         int pnid = (int)t_.size() - 1;
 #pragma omp parallel for
         for (int i = node_num; i < t_.size(); ++i)
-            t_[i] = new TrineTreeNode;
+            t_[i] = new TreeNode;
 #pragma omp parallel for
         for (int i = 0; i < t_task.size(); ++i)
         {
@@ -791,7 +791,7 @@ namespace TrineTree
         }
     }
 
-    void ParaTrineTree::CreateMoveTask(const std::vector<uint32_t> &change_ver, std::vector<std::vector<std::vector<int>>> &need_add, std::vector<std::vector<bool>> &need_erase)
+    void Tree::CreateMoveTask(const std::vector<uint32_t> &change_ver, std::vector<std::vector<std::vector<int>>> &need_add, std::vector<std::vector<bool>> &need_erase)
     {
         // uint32_t thread_task_num = change_ver.size() / thread_num;
 
@@ -805,7 +805,7 @@ namespace TrineTree
         }
     }
 
-    void ParaTrineTree::EraseVervex(const std::vector<std::vector<bool>> &need_erase)
+    void Tree::EraseVervex(const std::vector<std::vector<bool>> &need_erase)
     {
         // erase
 #pragma omp parallel for
@@ -832,7 +832,7 @@ namespace TrineTree
         }
     }
 
-    void ParaTrineTree::AddVertex(const std::vector<std::vector<std::vector<int>>> &need_add)
+    void Tree::AddVertex(const std::vector<std::vector<std::vector<int>>> &need_add)
     {
 // add
 #pragma omp parallel for
@@ -851,7 +851,7 @@ namespace TrineTree
         }
     }
 
-    void ParaTrineTree::RemoveEdge(const EdgListT &edg, bool flag)
+    void Tree::RemoveEdge(const EdgListT &edg, bool flag)
     {
         omp_set_num_threads(thread_num);
 
@@ -940,7 +940,7 @@ namespace TrineTree
 
         // split node down to up
         int cur_k = trine_.GetMaxTrine();
-        std::vector<std::vector<TrineTreeNode *>> push_to_chil(t_.size());
+        std::vector<std::vector<TreeNode *>> push_to_chil(t_.size());
         WaitFreeRankDSU dsu_(g_.GetNodeNum(), pg.rank_);
         VI tag(g_.GetNodeNum(), -1);
         for (int cur_k = trine_.GetMaxTrine(); cur_k >= 0; cur_k--)
@@ -964,7 +964,7 @@ namespace TrineTree
                 continue;
             // printf("%d\n", cur_k);
 
-            std::vector<std::vector<TrineTreeNode *>> push_to_t(thread_num);
+            std::vector<std::vector<TreeNode *>> push_to_t(thread_num);
             std::vector<int> Jump(t_.size(), -1);
             // split one node
 
@@ -1076,7 +1076,7 @@ namespace TrineTree
                                 // printf("v: %d\n", v);
                                 if (dsu_.get_pivot(v) != v)
                                     continue;
-                                TrineTreeNode *newv = new TrineTreeNode;
+                                TreeNode *newv = new TreeNode;
                                 // printf("new node\n");
                                 newv->k = cur_k;
                                 newv->vertex_.push_back(v); // warning
@@ -1231,7 +1231,7 @@ namespace TrineTree
         AlgoProfile::GetInstance()->SetRemoveTime(s1, s2);
     }
 
-    void ParaTrineTree::CleanEmptyNode()
+    void Tree::CleanEmptyNode()
     {
         std::vector<std::vector<bool>> need_clear_empty_child(thread_num, std::vector<bool>(t_.size()));
         int unemptynum = (int)t_.size();
@@ -1280,7 +1280,7 @@ namespace TrineTree
 
         std::vector<int> old_to_new(t_.size());
 
-        std::vector<TrineTreeNode *> newt_(unemptynum);
+        std::vector<TreeNode *> newt_(unemptynum);
 #pragma omp parallel for
         for (int i = 0; i < t_.size(); ++i)
         {
@@ -1309,7 +1309,7 @@ namespace TrineTree
         }
     }
 
-    bool ParaTrineTree::check()
+    bool Tree::check()
     {
 
         AlgoProfile::GetInstance()->SetCorrect(false);
@@ -1335,7 +1335,7 @@ namespace TrineTree
 
         if (sum != tid_.size())
             return false;
-        std::vector<TrineTreeNode *> cy_t_;
+        std::vector<TreeNode *> cy_t_;
         std::vector<uint32_t> cy_tid_;
         cy_t_.swap(t_);
         cy_tid_.swap(tid_);

@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
-#include "TrineTree.hpp"
+#include "Tree.hpp"
 #include "AlgoProfile.hpp"
 #include "CoreTree.hpp"
 #include "AY.hpp"
@@ -50,7 +50,7 @@ void Usage(std::string process)
 void test(std::string filename)
 {
 	omp_set_num_threads(32);
-	TrineTree::ParaTrineTree t(filename, 32);
+	Tree::Tree t(filename, 32);
 	
 
 
@@ -60,7 +60,7 @@ void test(std::string filename)
 	t.Build();
 	hclock::time_point t2 = hclock::now();
 
-	printf("build time: %.3lf\n",TrineTree::get_time_s(t1, t2));
+	printf("build time: %.3lf\n",Tree::get_time_s(t1, t2));
 	fflush(stdout);
 	printf("start\n");
 	fflush(stdout);
@@ -72,7 +72,7 @@ void test(std::string filename)
 		hclock::time_point s2 = hclock::now();
 		t.InsertEdge(tmp,true);
 		hclock::time_point s3 = hclock::now();
-		printf("num: %d remove: %.3lf insert: %.3lf\n", i, TrineTree::get_time_s(s1, s2), TrineTree::get_time_s(s2, s3));
+		printf("num: %d remove: %.3lf insert: %.3lf\n", i, Tree::get_time_s(s1, s2), Tree::get_time_s(s2, s3));
 		fflush(stdout);
 	}
 	for (int i = 10; i <= 10; i++)
@@ -83,7 +83,7 @@ void test(std::string filename)
 		hclock::time_point s2 = hclock::now();
 		t.InsertEdge(tmp,true);
 		hclock::time_point s3 = hclock::now();
-		printf("num: %d remove: %.3lf insert: %.3lf\n", i, TrineTree::get_time_s(s1, s2), TrineTree::get_time_s(s2, s3));
+		printf("num: %d remove: %.3lf insert: %.3lf\n", i, Tree::get_time_s(s1, s2), Tree::get_time_s(s2, s3));
 		fflush(stdout);
 	}
 }
@@ -91,7 +91,7 @@ void test(std::string filename)
 void test1(std::string filename)
 {
 	omp_set_num_threads(32);
-	TrineTree::ParaTrineTree t(filename, 32);
+	Tree::Tree t(filename, 32);
 
 	printf("start build\n");
 	fflush(stdout);
@@ -137,11 +137,11 @@ void test1(std::string filename)
 		hclock::time_point s11 = hclock::now();
 
 		printf("插入正常时间: %.3lf  禁用虚拟边压缩: %.3lf 禁用延迟传播: %.3lf\n", 
-			TrineTree::get_time_s(s2,s3),TrineTree::get_time_s(s4,s5),TrineTree::get_time_s(s6,s7));
+			Tree::get_time_s(s2,s3),Tree::get_time_s(s4,s5),Tree::get_time_s(s6,s7));
 
-		printf("删除正常时间: %.3lf 禁用优化: %.3lf\n", TrineTree::get_time_s(s1,s2),TrineTree::get_time_s(s7,s8) );
+		printf("删除正常时间: %.3lf 禁用优化: %.3lf\n", Tree::get_time_s(s1,s2),Tree::get_time_s(s7,s8) );
 
-		printf("插入正常时间: %.3lf 删除正常时间: %.3lf \n",TrineTree::get_time_s(s10,s11),TrineTree::get_time_s(s9,s10));
+		printf("插入正常时间: %.3lf 删除正常时间: %.3lf \n",Tree::get_time_s(s10,s11),Tree::get_time_s(s9,s10));
 
 		fflush(stdout);
 	}
@@ -150,7 +150,7 @@ void test1(std::string filename)
 void test2(std::string filename)
 {
 	omp_set_num_threads(32);
-	TrineTree::ParaTrineTree t(filename, 32);
+	Tree::Tree t(filename, 32);
 
 	printf("start build\n");
 	fflush(stdout);
@@ -167,7 +167,7 @@ void test2(std::string filename)
 		t.InsertEdge(tmp,true);
 		hclock::time_point s3 = hclock::now();
 
-		printf("thread num: %d remove time: %.3lf insert time: %.3lf\n ",i,TrineTree::get_time_s(s1, s2),TrineTree::get_time_s(s2, s3));
+		printf("thread num: %d remove time: %.3lf insert time: %.3lf\n ",i,Tree::get_time_s(s1, s2),Tree::get_time_s(s2, s3));
 		fflush(stdout);
 	}
 }
@@ -175,7 +175,7 @@ void test2(std::string filename)
 
 // int main()
 // {
-// 	TrineTree::ParaTrineTree t("Graph/Google.txt");
+// 	Tree::Tree t("Graph/Google.txt");
 // 	t.Build();
 // 	std::vector<std::pair<uint32_t, uint32_t>> tmp(t.g_.GetRd().begin(), t.g_.GetRd().end());
 // 	for(int i=0;i<100;++i)
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 
 	omp_set_num_threads(32);
 	hclock::time_point tp1 = hclock::now();
-	TrineTree::ParaTrineTree t(filename,32);
+	Tree::Tree t(filename,32);
 
 	printf("start build\n");
 	fflush(stdout);
@@ -268,18 +268,18 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-// ParaTrineTree t("Graph/Google.txt");
-// ParaTrineTree t("Graph/gp.txt");
-// ParaTrineTree t("Graph/g5.txt");
-// ParaTrineTree t("Graph/orkut.txt");
-// ParaTrineTree t("Graph/pokec.txt");
-// ParaTrineTree t("Graph/as-skitter.txt");  //no
-// ParaTrineTree t("Graph/Friendster.txt");  //no
-// ParaTrineTree t("Graph/socfb-A-anon.txt");
-// ParaTrineTree t("Graph/sx-superuser.txt");
-// ParaTrineTree t("Graph/web-wikipedia-growth.txt");
-// ParaTrineTree t("Graph/soc-LiveJournal1.txt"); //bad
-// ParaTrineTree t("Graph/sx-stackoverflow.txt");
+// Tree t("Graph/Google.txt");
+// Tree t("Graph/gp.txt");
+// Tree t("Graph/g5.txt");
+// Tree t("Graph/orkut.txt");
+// Tree t("Graph/pokec.txt");
+// Tree t("Graph/as-skitter.txt");  //no
+// Tree t("Graph/Friendster.txt");  //no
+// Tree t("Graph/socfb-A-anon.txt");
+// Tree t("Graph/sx-superuser.txt");
+// Tree t("Graph/web-wikipedia-growth.txt");
+// Tree t("Graph/soc-LiveJournal1.txt"); //bad
+// Tree t("Graph/sx-stackoverflow.txt");
 
 double avg_deg(int n, ll m, ll in, ll out, int num)
 {
@@ -372,7 +372,7 @@ void PrintAns(std::vector<CompRecord> vt, std::string file)
 
 // 	omp_set_num_threads(32);
 // 	hclock::time_point tp1 = hclock::now();
-// 	TrineTree::ParaTrineTree t(filename);
+// 	Tree::Tree t(filename);
 
 // 	Graph gh(filename);
 // 	ParaCoreTree ct(gh);
@@ -401,7 +401,7 @@ void PrintAns(std::vector<CompRecord> vt, std::string file)
 // int main()
 // {
 // 	Daemon();
-// 	TrineTree::ParaTrineTree t("Graph/yelp_edges.txt");
+// 	Tree::Tree t("Graph/yelp_edges.txt");
 // 	t.Build();
 // 	printf("good\n");
 // 	fflush(stdout);
