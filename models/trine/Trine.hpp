@@ -2,6 +2,7 @@
 #include<vector>
 #include<functional>
 #include"Graph.hpp"
+#include "CohesiveModel.hpp"
 
 
 #include <cstdint>
@@ -25,15 +26,15 @@
 
 #define COUNT_TS false
 
-class Trine {
+class Trine : public CohesiveModel {
 public:
     Trine(Graph &g);
     Trine(const Trine&) = delete;
-    ~Trine()=default;
-    void Init();
+    ~Trine() override = default;
+    void Init() override;
     //do triange count and trine decomposition for static graph
-    void Insert(const EdgListT& nedges);
-    void Remove(const std::vector<EdgT>& redges);
+    void Insert(const EdgListT& nedges) override;
+    void Remove(const std::vector<EdgT>& redges) override;
 
     //void YikaiRemove(const std::vector<EdgT>& redges);
 
@@ -44,6 +45,8 @@ public:
     uint32_t GetMaxTrine() { return max_trine_; };
     uint32_t operator[](uint32_t x) { return triness_[x]; }
     std::vector<uint32_t>& GetTriness() { return triness_; }
+    uint32_t GetMaxLevel() override { return GetMaxTrine(); }
+    std::vector<uint32_t> &GetLevels() override { return GetTriness(); }
 private:
 
     const uint32_t n_, m_;

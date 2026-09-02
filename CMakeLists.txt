@@ -33,6 +33,7 @@ add_library(mhd_core STATIC
     models/trine/detail/theheap.cpp
 
     include/analysis/AY.hpp
+    models/CohesiveModel.hpp
     models/core/CoreTree.hpp
     graph/Graph.hpp
     graph/ParaGraph.hpp
@@ -52,6 +53,7 @@ target_compile_features(mhd_core PUBLIC cxx_std_14)
 target_include_directories(mhd_core
     PUBLIC
         "${PROJECT_SOURCE_DIR}/include/analysis"
+        "${PROJECT_SOURCE_DIR}/models"
         "${PROJECT_SOURCE_DIR}/models/core"
         "${PROJECT_SOURCE_DIR}/graph"
         "${PROJECT_SOURCE_DIR}/utils"
