@@ -1,15 +1,15 @@
-#include "ParaTrineGraph.hpp"
+#include "TreeBuildIndex.hpp"
 
 #include <algorithm>
 
 #include "GraphUtils.h"
 
-ParaTrineGraph::ParaTrineGraph(Graph &g, uint32_t *trine) : g(g), trine(trine)
+TreeBuildIndex::TreeBuildIndex(Graph &g, uint32_t *level) : g(g), level(level)
 {
     __build_index();
 }
 
-void ParaTrineGraph::__build_index()
+void TreeBuildIndex::__build_index()
 {
     int n = g.GetNodeNum();
     uint32_t mx = 0;
@@ -18,12 +18,12 @@ void ParaTrineGraph::__build_index()
 #endif
     for (int i = 0; i < n; i++)
     {
-        mx = std::max(mx, trine[i]);
+        mx = std::max(mx, level[i]);
     }
-    max_trine = mx;
+    max_level = mx;
 
     seq_.resize(n);
-    bin_.resize(max_trine + 2);
+    bin_.resize(max_level + 2);
     rank_.resize(n);
     int num_threads;
     VVI bin_private;
@@ -33,7 +33,7 @@ void ParaTrineGraph::__build_index()
 #pragma omp single
         {
             num_threads = omp_get_num_threads();
-            bin_private = VVI(num_threads, VI(max_trine + 1, 0));
+            bin_private = VVI(num_threads, VI(max_level + 1, 0));
         }
         int cur_p = omp_get_thread_num();
         int start = (LL)n * cur_p / num_threads;
@@ -42,9 +42,9 @@ void ParaTrineGraph::__build_index()
 
         for (int v = start; v < end; ++v)
         {
-            bin_private[cur_p][trine[v]]++;
+            bin_private[cur_p][level[v]]++;
         }
-        for (LL k = 0; k <= max_trine; k++)
+        for (LL k = 0; k <= max_level; k++)
         {
             my_fetch_add(&bin_[k + 1], bin_private[cur_p][k]);
         }
@@ -52,13 +52,13 @@ void ParaTrineGraph::__build_index()
 
 #pragma omp single
         {
-            for (LL k = 1; k <= max_trine + 1; ++k)
+            for (LL k = 1; k <= max_level + 1; ++k)
             {
                 bin_[k] += bin_[k - 1];
             }
         }
 #pragma omp for
-        for (LL k = 0; k <= max_trine; k++)
+        for (LL k = 0; k <= max_level; k++)
         {
             bin_private[0][k] += bin_[k];
             for (int j = 1; j < num_threads; j++)
@@ -68,19 +68,19 @@ void ParaTrineGraph::__build_index()
         }
         for (int v = end - 1; v >= start; --v)
         {
-            int pos = --bin_private[cur_p][trine[v]];
+            int pos = --bin_private[cur_p][level[v]];
             seq_[pos] = v;
             rank_[v] = pos;
         }
     }
 }
 
-bool ParaTrineGraph::rank_cmp(int x, int y)
+bool TreeBuildIndex::rank_cmp(int x, int y)
 {
     return rank_[x] < rank_[y];
 }
 
-int ParaTrineGraph::get_coreness(int x)
+int TreeBuildIndex::get_level(int x)
 {
-    return trine[x];
+    return level[x];
 }

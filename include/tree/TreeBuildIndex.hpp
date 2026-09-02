@@ -5,20 +5,20 @@
 
 #include "Graph.hpp"
 
-class ParaTrineGraph
+class TreeBuildIndex
 {
 public:
-    ParaTrineGraph(Graph &g, uint32_t *trine);
+    TreeBuildIndex(Graph &g, uint32_t *level);
 
     bool rank_cmp(int x, int y);
-    int get_coreness(int x);
+    int get_level(int x);
 
     std::vector<int> seq_, bin_, rank_;
     Graph &g;
-    uint32_t *trine;
-    uint32_t max_trine;
+    uint32_t *level;
+    uint32_t max_level;
 
 private:
-    ParaTrineGraph();
+    TreeBuildIndex();
     void __build_index();
 };
