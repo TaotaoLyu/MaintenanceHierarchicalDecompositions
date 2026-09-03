@@ -13,7 +13,7 @@ namespace
     void PrintUsage(const char *executable_name)
     {
         std::printf("Usage: %s <graph_file>\n", executable_name);
-        std::printf("Example: %s Graph/Google.txt\n", executable_name);
+        std::printf("Example: %s Data/pokec.txt\n", executable_name);
     }
 }
 
