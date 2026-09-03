@@ -53,9 +53,9 @@ namespace Tree
 
 		void Merge(TreeNode *dst, TreeNode *src);
 
-		void InsertEdge(const EdgListT &edg,bool flag=true,bool flag1=true);
+		void InsertEdge(const Graph::EdgeList &edg,bool flag=true,bool flag1=true);
 
-		void RemoveEdge(const EdgListT &edg, bool flag=true);
+		void RemoveEdge(const Graph::EdgeList &edg, bool flag=true);
 
 		bool check();
 		void SetThreadNum(int num);

@@ -39,11 +39,11 @@ public:
     }
     void build()
     {
-        std::vector<int> deg(g.GetNodeNum());
+        std::vector<int> deg(g.GetVertexCount());
         
         PKC(&g, deg.data());
         TreeBuildIndex pg(g, (uint32_t *)deg.data());
-        int n = pg.g.GetNodeNum();
+        int n = pg.g.GetVertexCount();
         tid_ = VI(n, -1);
         VI tag(n, -1);
         WaitFreeRankDSU dsu_(n, pg.rank_);

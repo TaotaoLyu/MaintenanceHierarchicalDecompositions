@@ -33,10 +33,10 @@ public:
     ~Trine() override = default;
     void Init() override;
     //do triange count and trine decomposition for static graph
-    void Insert(const EdgListT& nedges) override;
-    void Remove(const std::vector<EdgT>& redges) override;
+    void Insert(const Graph::EdgeList& nedges) override;
+    void Remove(const Graph::EdgeList& redges) override;
 
-    //void YikaiRemove(const std::vector<EdgT>& redges);
+    //void YikaiRemove(const Graph::EdgeList& redges);
 
     bool CSmall(const uint32_t x, const uint32_t y) {
         return c_[x] < c_[y] || (c_[x] == c_[y] && x < y);
@@ -56,7 +56,7 @@ private:
     // graph.h class Graph
 
     bool CmpDeg(int x, int y) {
-        return g_.GetDeg()[x] > g_.GetDeg()[y] || (g_.GetDeg()[x] == g_.GetDeg()[y] && x > y);
+        return g_.GetDegrees()[x] > g_.GetDegrees()[y] || (g_.GetDegrees()[x] == g_.GetDegrees()[y] && x > y);
     }
     bool CmpTriness(int x, int y) {
         return triness_[x] > triness_[y];

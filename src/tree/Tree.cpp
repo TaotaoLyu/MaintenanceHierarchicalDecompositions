@@ -2,6 +2,8 @@
 #include "AlgoProfile.hpp"
 #include "TreeBuildIndex.hpp"
 #include <queue>
+#include <set>
+#include <unordered_map>
 
 namespace Tree
 {
@@ -25,7 +27,7 @@ namespace Tree
 
         TreeBuildIndex pg(g_, model_->GetLevels().data());
 
-        int n = pg.g.GetNodeNum(); // modify
+        int n = pg.g.GetVertexCount(); // modify
         tid_ = std::vector<uint32_t>(n, -1);
         VI tag(n, -1);
         WaitFreeRankDSU dsu_(n, pg.rank_);
@@ -340,7 +342,7 @@ namespace Tree
         src->child_.clear();
         src->vertex_.clear();
     }
-    void Tree::InsertEdge(const EdgListT &edg, bool flag,bool flag1)
+    void Tree::InsertEdge(const Graph::EdgeList &edg, bool flag, bool flag1)
     {
         omp_set_num_threads(thread_num);
 
@@ -383,7 +385,7 @@ namespace Tree
             for (auto v : g_[u])
             {
                 int v_tid = tid_[v];
-                if(flag) // modify
+                if (flag) // modify
                 {
                     if (t_[v_tid]->k > old_level[i])
                         bucket[cur_p][std::max(t_[u_tid]->k, t_[v_tid]->k)].push_back(std::make_pair(u_tid, v_tid));
@@ -449,7 +451,7 @@ namespace Tree
 
         TreeBuildIndex pg(g_, model_->GetLevels().data());
 
-        WaitFreeRankDSU dsu_(g_.GetNodeNum(), pg.rank_);
+        WaitFreeRankDSU dsu_(g_.GetVertexCount(), pg.rank_);
         std::vector<int> visted(t_.size());
         std::vector<std::vector<int>> merge_node(t_.size());
         std::vector<std::vector<int>> add_edge(t_.size());
@@ -457,11 +459,6 @@ namespace Tree
         std::vector<std::mutex> mt_node(t_.size());
         // std::vector<std::mutex> mt_k(model_->GetMaxLevel() + 1);
         int k = model_->GetMaxLevel();
-
-
-
-
-
 
         while (k >= 0)
         {
@@ -475,7 +472,7 @@ namespace Tree
             // printf("p1\n");
 
             // printf("p1\n");
-// #pragma omp parallel for
+            // #pragma omp parallel for
             for (int i = 0; i < k_vedge.size(); ++i)
             {
                 int u_tid = k_vedge[i].first;
@@ -496,7 +493,7 @@ namespace Tree
             }
             // printf("p2\n");
 
-// #pragma omp parallel for
+            // #pragma omp parallel for
             for (int i = 0; i < k_vedge.size(); ++i)
             {
                 int u_tid = k_vedge[i].first;
@@ -506,7 +503,7 @@ namespace Tree
                 // uid
                 if (dsu_.get_pivot(t_[u_tid]->vertex_.front()) == t_[u_tid]->vertex_.front() && my_fetch_add(&visted[u_tid], 1) == 0)
                 {
-// #pragma omp critical(need_work)
+                    // #pragma omp critical(need_work)
                     {
                         need_work.push_back(u_tid);
                     }
@@ -523,7 +520,7 @@ namespace Tree
                     continue;
                 if (dsu_.get_pivot(t_[v_tid]->vertex_.front()) == t_[v_tid]->vertex_.front() && my_fetch_add(&visted[v_tid], 1) == 0)
                 {
-// #pragma omp critical(need_work)
+                    // #pragma omp critical(need_work)
                     {
                         need_work.push_back(v_tid);
                     }
@@ -601,30 +598,24 @@ namespace Tree
                     if (flag1)
                     {
 
-
-
                         for (auto &tid : ust)
                         {
                             merged_bucket[maxk].push_back(std::make_pair(tid, maxid));
                         }
-
-
-
                     }
                     else
                     {
-                        std::vector<int> tmp(ust.begin(),ust.end());
-                        for(int b=0;b<tmp.size();++b)
+                        std::vector<int> tmp(ust.begin(), ust.end());
+                        for (int b = 0; b < tmp.size(); ++b)
                         {
-                            for(int d=b+1;d<tmp.size();++d)
+                            for (int d = b + 1; d < tmp.size(); ++d)
                             {
-                                int uid=tmp[b];
-                                int vid=tmp[d];
-                                int mk=std::max(t_[uid]->k,t_[vid]->k);
+                                int uid = tmp[b];
+                                int vid = tmp[d];
+                                int mk = std::max(t_[uid]->k, t_[vid]->k);
                                 merged_bucket[mk].push_back(std::make_pair(uid, vid));
                             }
                         }
-
                     }
                 }
             }
@@ -821,7 +812,7 @@ namespace Tree
         }
     }
 
-    void Tree::RemoveEdge(const EdgListT &edg, bool flag)
+    void Tree::RemoveEdge(const Graph::EdgeList &edg, bool flag)
     {
         omp_set_num_threads(thread_num);
 
@@ -842,7 +833,7 @@ namespace Tree
         TreeBuildIndex pg(g_, model_->GetLevels().data());
 
         std::vector<uint32_t> change_ver;
-        for (int i = 0; i < g_.GetNodeNum(); ++i)
+        for (int i = 0; i < g_.GetVertexCount(); ++i)
             if (old_level[i] != (*model_)[i])
                 change_ver.emplace_back(i);
 
@@ -912,8 +903,8 @@ namespace Tree
         // split node down to up
         // int cur_k = model_->GetMaxLevel();
         std::vector<std::vector<TreeNode *>> push_to_chil(t_.size());
-        WaitFreeRankDSU dsu_(g_.GetNodeNum(), pg.rank_);
-        VI tag(g_.GetNodeNum(), -1);
+        WaitFreeRankDSU dsu_(g_.GetVertexCount(), pg.rank_);
+        VI tag(g_.GetVertexCount(), -1);
         for (int cur_k = model_->GetMaxLevel(); cur_k >= 0; cur_k--)
         {
             // printf("%d\n", cur_k);
@@ -946,7 +937,7 @@ namespace Tree
                 {
                     int local_max = -1;
                     int local_min = INT_MAX;
-                    int n = g_.GetNodeNum(); // modify
+                    int n = g_.GetVertexCount(); // modify
 
                     int old_t_num = (int)t_.size();
 
@@ -972,7 +963,7 @@ namespace Tree
                         int parent = t_[split_tid[i]]->pa;
                         if (parent != -1)
                         {
-                            if (need_transmit[split_tid[i]] || !flag)  // modify
+                            if (need_transmit[split_tid[i]] || !flag) // modify
                             {
 
                                 need_split[omp_get_thread_num()][t_[parent]->k].push_back(parent);
@@ -1158,7 +1149,7 @@ namespace Tree
                         t_[split_tid[i]]->child_.clear();
 
                         // check
-                        if (need_transmit[split_tid[i]] || !flag)  // modify
+                        if (need_transmit[split_tid[i]] || !flag) // modify
                         {
 #if defined(__linux__)
 #pragma omp parallel for reduction(max : local_max) reduction(min : local_min)
@@ -1170,7 +1161,7 @@ namespace Tree
                                 local_max = std::max(local_max, tid_val);
                                 local_min = std::min(local_min, tid_val);
                             }
-                            if (local_max != local_min || !flag) //modify
+                            if (local_max != local_min || !flag) // modify
                             {
                                 int parent = t_[split_tid[i]]->pa;
                                 if (parent != -1)
@@ -1302,7 +1293,6 @@ namespace Tree
                     return false;
             }
         }
-
 
         if (sum != tid_.size())
             return false;

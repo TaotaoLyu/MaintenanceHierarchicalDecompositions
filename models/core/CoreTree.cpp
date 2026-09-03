@@ -22,7 +22,7 @@ void PKC(Graph *g, int *deg)
         NUM_THREADS = omp_get_num_threads();
     }
 
-    long n = g->GetNodeNum();
+    long n = g->GetVertexCount();
     long reduceN = 0;
     long Size = 0;
     long visited = 0;
@@ -49,7 +49,7 @@ void PKC(Graph *g, int *deg)
 #pragma omp for schedule(static)
         for (long i = 0; i < n; i++)
         {
-            deg[i] = g->GetDeg()[i];
+            deg[i] = g->GetDegrees()[i];
         }
 
         while (visited < n)

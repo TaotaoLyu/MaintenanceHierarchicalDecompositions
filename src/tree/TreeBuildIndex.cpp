@@ -11,7 +11,7 @@ TreeBuildIndex::TreeBuildIndex(Graph &g, uint32_t *level) : g(g), level(level)
 
 void TreeBuildIndex::__build_index()
 {
-    int n = g.GetNodeNum();
+    int n = g.GetVertexCount();
     uint32_t mx = 0;
 #if defined(__linux__)
 #pragma omp parallel for reduction(max : mx)

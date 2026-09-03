@@ -11,8 +11,8 @@ public:
     virtual ~CohesiveModel() = default;
 
     virtual void Init() = 0;
-    virtual void Insert(const EdgListT &edges) = 0;
-    virtual void Remove(const EdgListT &edges) = 0;
+    virtual void Insert(const Graph::EdgeList &edges) = 0;
+    virtual void Remove(const Graph::EdgeList &edges) = 0;
 
     virtual uint32_t GetMaxLevel() = 0;
     virtual std::vector<uint32_t> &GetLevels() = 0;

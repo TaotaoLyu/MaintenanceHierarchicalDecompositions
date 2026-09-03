@@ -4,10 +4,10 @@
 
 Trine::Trine(Graph &g) : g_(g),
                          c_small(std::bind(&Trine::CSmall, this, std::placeholders::_1, std::placeholders::_2)),
-                         n_(g.GetNodeNum()),
-                         m_(g.GetEdgeNum()),
-                         order_obj(g.GetNodeNum(), g.GetEdgeNum()),
-                         Cbin(g.GetNodeNum()),
+                         n_(g.GetVertexCount()),
+                         m_(g.GetEdgeCount()),
+                         order_obj(g.GetVertexCount(), g.GetEdgeCount()),
+                         Cbin(g.GetVertexCount()),
                          max_trine_(0)
 {
 
@@ -25,15 +25,6 @@ Trine::Trine(Graph &g) : g_(g),
 
 void Trine::Init()
 {
-    /*for (const auto edg : gedges) {
-        const uint32_t v1 = edg.first;
-        const uint32_t v2 = edg.second;
-        ASSERT(v1 < n_ && v2 < n_ && v1 != v2);
-        g_.Nie[v1].push_back(v2);
-        g_.Nie[v2].push_back(v1);
-        g_.deg_[v1]++, g_.deg_[v2]++;
-    }*/
-
     TriangleCount(c_, !(COUNT_TS));
 
     std::vector<uint32_t> order;
@@ -82,10 +73,10 @@ const void Trine::TriangleCount(std::vector<uint32_t> &cnt, bool typ)
     for (uint32_t i = 0; i < n_; i++)
     {
         for (auto j : g_[_[i]])
-            if (g_.GetDeg()[j] < g_.GetDeg()[_[i]] || (g_.GetDeg()[j] == g_.GetDeg()[_[i]] && j < (long long)_[i]))
+            if (g_.GetDegrees()[j] < g_.GetDegrees()[_[i]] || (g_.GetDegrees()[j] == g_.GetDegrees()[_[i]] && j < (long long)_[i]))
                 bin_[j] = true;
         for (auto j : g_[_[i]])
-            if (g_.GetDeg()[j] < g_.GetDeg()[_[i]] || (g_.GetDeg()[j] == g_.GetDeg()[_[i]] && j < (long long)_[i]))
+            if (g_.GetDegrees()[j] < g_.GetDegrees()[_[i]] || (g_.GetDegrees()[j] == g_.GetDegrees()[_[i]] && j < (long long)_[i]))
             {
                 for (auto k : g_[j])
                     if (bin_[k])
@@ -191,7 +182,7 @@ const void Trine::TriDecomp(std::vector<uint32_t> &order)
     }
 }
 
-void Trine::Insert(const EdgListT &nedges)
+void Trine::Insert(const Graph::EdgeList &nedges)
 {
     ASSERT(!nedges.empty());
     // do for each nedg:
@@ -204,11 +195,11 @@ void Trine::Insert(const EdgListT &nedges)
         u = edg.first, v = edg.second;
         // ASSERT(u < n_ && v < n_ && u != v);
 
-        /*g_.GetDeg()[u]++, g_[u].push_back(v);
-        g_.GetDeg()[v]++, g_[v].push_back(u);*/
+        /*g_.GetDegrees()[u]++, g_[u].push_back(v);
+        g_.GetDegrees()[v]++, g_[v].push_back(u);*/
         g_.InsertEdge(u, v);
 
-        if (g_.GetDeg()[u] > g_.GetDeg()[v])
+        if (g_.GetDegrees()[u] > g_.GetDegrees()[v])
             std::swap(u, v);
         for (auto w : g_[u])
             bin_[w] = true;
@@ -633,7 +624,7 @@ uint32_t Trine::trinesschange(uint32_t u, uint32_t K)
     return tnew;
 } // change triness and order
 
-void Trine::Remove(const std::vector<EdgT> &redges)
+void Trine::Remove(const Graph::EdgeList &redges)
 {
     ASSERT(!redges.empty());
 
@@ -645,7 +636,7 @@ void Trine::Remove(const std::vector<EdgT> &redges)
         uint32_t u, v;
         u = edg.first, v = edg.second;
         ASSERT(u < n_ && v < n_ && u != v);
-        if (g_.GetDeg()[u] > g_.GetDeg()[v])
+        if (g_.GetDegrees()[u] > g_.GetDegrees()[v])
             std::swap(u, v);
 
         for (auto w : g_[u])
@@ -675,7 +666,7 @@ void Trine::Remove(const std::vector<EdgT> &redges)
         /*for (auto p : { u,v }) {
             uint32_t q = u + v - p;
             int i;
-            g_.GetDeg()[p]--;
+            g_.GetDegrees()[p]--;
             for (int i = 0; i < g_[p].size(); i++)
                 if (g_[p][i] == q) {
                     std::swap(g_[p][i], g_[p][g_[p].size() - 1]);
