@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdio>
 
+#include "Timing.hpp"
 #include "Tree.hpp"
 
 namespace
@@ -15,12 +16,12 @@ namespace
         std::printf("[Build] Starting tree construction.\n");
         std::fflush(stdout);
 
-        const hclock::time_point start_time = hclock::now();
+        const Timing::Clock::time_point start_time = Timing::Clock::now();
         tree.Build();
-        const hclock::time_point end_time = hclock::now();
+        const Timing::Clock::time_point end_time = Timing::Clock::now();
 
         std::printf("[Build] Completed in %.3f s.\n",
-                    Tree::get_time_s(start_time, end_time));
+                    Timing::ElapsedSeconds(start_time, end_time));
         std::fflush(stdout);
     }
 
@@ -55,16 +56,16 @@ namespace App
             if (!SelectEdges(tree, edge_count, edges, "Batch Size"))
                 continue;
 
-            const hclock::time_point remove_start = hclock::now();
+            const Timing::Clock::time_point remove_start = Timing::Clock::now();
             tree.RemoveEdge(edges);
-            const hclock::time_point remove_end = hclock::now();
+            const Timing::Clock::time_point remove_end = Timing::Clock::now();
             tree.InsertEdge(edges);
-            const hclock::time_point insert_end = hclock::now();
+            const Timing::Clock::time_point insert_end = Timing::Clock::now();
 
             std::printf("[Batch Size] Edges: %zu | Remove: %.3f s | Insert: %.3f s\n",
                         edge_count,
-                        Tree::get_time_s(remove_start, remove_end),
-                        Tree::get_time_s(remove_end, insert_end));
+                        Timing::ElapsedSeconds(remove_start, remove_end),
+                        Timing::ElapsedSeconds(remove_end, insert_end));
             std::fflush(stdout);
         }
     }
@@ -81,46 +82,46 @@ namespace App
         tree.RemoveEdge(edges);
         tree.InsertEdge(edges);
 
-        const hclock::time_point baseline_remove_start = hclock::now();
+        const Timing::Clock::time_point baseline_remove_start = Timing::Clock::now();
         tree.RemoveEdge(edges);
-        const hclock::time_point baseline_remove_end = hclock::now();
+        const Timing::Clock::time_point baseline_remove_end = Timing::Clock::now();
         tree.InsertEdge(edges);
-        const hclock::time_point baseline_insert_end = hclock::now();
+        const Timing::Clock::time_point baseline_insert_end = Timing::Clock::now();
 
         tree.RemoveEdge(edges);
-        const hclock::time_point no_compression_start = hclock::now();
+        const Timing::Clock::time_point no_compression_start = Timing::Clock::now();
         tree.InsertEdge(edges, false, true);
-        const hclock::time_point no_compression_end = hclock::now();
+        const Timing::Clock::time_point no_compression_end = Timing::Clock::now();
 
         tree.RemoveEdge(edges);
-        const hclock::time_point no_deferred_propagation_start = hclock::now();
+        const Timing::Clock::time_point no_deferred_propagation_start = Timing::Clock::now();
         tree.InsertEdge(edges, true, false);
-        const hclock::time_point no_deferred_propagation_end = hclock::now();
+        const Timing::Clock::time_point no_deferred_propagation_end = Timing::Clock::now();
 
-        const hclock::time_point unoptimized_remove_start = hclock::now();
+        const Timing::Clock::time_point unoptimized_remove_start = Timing::Clock::now();
         tree.RemoveEdge(edges, false);
-        const hclock::time_point unoptimized_remove_end = hclock::now();
+        const Timing::Clock::time_point unoptimized_remove_end = Timing::Clock::now();
         tree.InsertEdge(edges);
 
-        const hclock::time_point second_remove_start = hclock::now();
+        const Timing::Clock::time_point second_remove_start = Timing::Clock::now();
         tree.RemoveEdge(edges);
-        const hclock::time_point second_remove_end = hclock::now();
+        const Timing::Clock::time_point second_remove_end = Timing::Clock::now();
         tree.InsertEdge(edges);
-        const hclock::time_point second_insert_end = hclock::now();
+        const Timing::Clock::time_point second_insert_end = Timing::Clock::now();
 
         std::printf("[Optimization] Insert baseline: %.3f s | No virtual-edge compression: %.3f s | No deferred propagation: %.3f s\n",
-                    Tree::get_time_s(baseline_remove_end, baseline_insert_end),
-                    Tree::get_time_s(no_compression_start, no_compression_end),
-                    Tree::get_time_s(no_deferred_propagation_start,
+                    Timing::ElapsedSeconds(baseline_remove_end, baseline_insert_end),
+                    Timing::ElapsedSeconds(no_compression_start, no_compression_end),
+                    Timing::ElapsedSeconds(no_deferred_propagation_start,
                                      no_deferred_propagation_end));
         std::printf("[Optimization] Remove baseline: %.3f s | Optimizations disabled: %.3f s\n",
-                    Tree::get_time_s(baseline_remove_start,
+                    Timing::ElapsedSeconds(baseline_remove_start,
                                      baseline_remove_end),
-                    Tree::get_time_s(unoptimized_remove_start,
+                    Timing::ElapsedSeconds(unoptimized_remove_start,
                                      unoptimized_remove_end));
         std::printf("[Optimization] Verification run | Remove: %.3f s | Insert: %.3f s\n",
-                    Tree::get_time_s(second_remove_start, second_remove_end),
-                    Tree::get_time_s(second_remove_end, second_insert_end));
+                    Timing::ElapsedSeconds(second_remove_start, second_remove_end),
+                    Timing::ElapsedSeconds(second_remove_end, second_insert_end));
         std::fflush(stdout);
     }
 
@@ -138,16 +139,16 @@ namespace App
         {
             tree.SetThreadNum(thread_count);
 
-            const hclock::time_point remove_start = hclock::now();
+            const Timing::Clock::time_point remove_start = Timing::Clock::now();
             tree.RemoveEdge(edges);
-            const hclock::time_point remove_end = hclock::now();
+            const Timing::Clock::time_point remove_end = Timing::Clock::now();
             tree.InsertEdge(edges);
-            const hclock::time_point insert_end = hclock::now();
+            const Timing::Clock::time_point insert_end = Timing::Clock::now();
 
             std::printf("[Thread Scaling] Threads: %d | Remove: %.3f s | Insert: %.3f s\n",
                         thread_count,
-                        Tree::get_time_s(remove_start, remove_end),
-                        Tree::get_time_s(remove_end, insert_end));
+                        Timing::ElapsedSeconds(remove_start, remove_end),
+                        Timing::ElapsedSeconds(remove_end, insert_end));
             std::fflush(stdout);
         }
     }

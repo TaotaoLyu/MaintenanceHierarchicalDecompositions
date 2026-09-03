@@ -8,8 +8,6 @@
 #include <set>
 #include <stdexcept>
 
-#include "AlgoProfile.hpp"
-
 namespace
 {
     constexpr std::size_t kRemovalEdgeCount = 10;
@@ -17,9 +15,6 @@ namespace
 
 Graph::Graph(const std::string &graph_filename)
 {
-    AlgoProfile::GetInstance()->SetFilename(graph_filename);
-    const hclock::time_point load_start = AlgoProfile::CaptureClock();
-
     std::ifstream input(graph_filename);
     if (!input)
         throw std::runtime_error("Failed to open graph file: " + graph_filename);
@@ -48,16 +43,7 @@ Graph::Graph(const std::string &graph_filename)
         adjacency_list_[edge.second].push_back(edge.first);
     }
 
-    const hclock::time_point load_end = AlgoProfile::CaptureClock();
-    AlgoProfile::GetInstance()->SetIOTime(load_start, load_end);
-    AlgoProfile::GetInstance()->SetEdgeNum(edge_count_);
-
     CalculateDegrees();
-    const int active_vertex_count = static_cast<int>(std::count_if(
-        degrees_.begin(), degrees_.end(),
-        [](uint32_t degree) { return degree != 0; }));
-    AlgoProfile::GetInstance()->SetVertexNum(active_vertex_count);
-
     std::printf("[Graph] Loaded %u vertices and %u edges.\n",
                 vertex_count_, edge_count_);
     std::fflush(stdout);

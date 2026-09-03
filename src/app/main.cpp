@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <string>
 
-#include "AlgoProfile.hpp"
+#include "Timing.hpp"
 #include "Daemon.hpp"
 #include "Tree.hpp"
 
@@ -32,11 +32,11 @@ int main(int argc, char *argv[])
 
     std::printf("[Build] Starting tree construction.\n");
     std::fflush(stdout);
-    const hclock::time_point build_start = hclock::now();
+    const Timing::Clock::time_point build_start = Timing::Clock::now();
     tree.Build();
-    const hclock::time_point build_end = hclock::now();
+    const Timing::Clock::time_point build_end = Timing::Clock::now();
     std::printf("[Build] Completed in %.3f s.\n",
-                Tree::get_time_s(build_start, build_end));
+                Timing::ElapsedSeconds(build_start, build_end));
 
     const Graph::EdgeList &update_edges = tree.g_.GetRemovalEdges();
     std::printf("[Remove] Starting update for %zu edges.\n",
@@ -54,8 +54,6 @@ int main(int argc, char *argv[])
     const bool insertion_is_valid = tree.check();
     std::printf("[Insert] Completed. Validation: %s.\n",
                 insertion_is_valid ? "passed" : "failed");
-
-    AlgoProfile::GetInstance()->Print();
 
     if (!removal_is_valid || !insertion_is_valid)
     {

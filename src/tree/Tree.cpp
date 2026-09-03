@@ -1,5 +1,4 @@
 #include "Tree.hpp"
-#include "AlgoProfile.hpp"
 #include "TreeBuildIndex.hpp"
 #include <queue>
 #include <set>
@@ -8,11 +7,6 @@
 namespace Tree
 {
     int thread_num = 32;
-
-    double get_time_s(hclock::time_point s, hclock::time_point t)
-    {
-        return std::chrono::duration_cast<std::chrono::duration<double>>(t - s).count();
-    }
 
     void Tree::SetThreadNum(int num)
     {
@@ -346,16 +340,7 @@ namespace Tree
     {
         omp_set_num_threads(thread_num);
 
-        AlgoProfile::GetInstance()->SetStatus(AlgoProfile::INSERT);
-        AlgoProfile::GetInstance()->SetInsertEdgeNum((int)edg.size());
-        AlgoProfile::GetInstance()->SetOldMaxTriness(model_->GetMaxLevel());
-        auto s1 = AlgoProfile::CaptureClock();
         model_->Insert(edg);
-        auto s2 = AlgoProfile::CaptureClock();
-        AlgoProfile::GetInstance()->SetUpdateTrinessTime(s1, s2);
-        AlgoProfile::GetInstance()->SetNewMaxTriness(model_->GetMaxLevel());
-
-        s1 = AlgoProfile::CaptureClock();
 
         // int thread_num = 32;
         std::vector<int> changever;
@@ -633,8 +618,6 @@ namespace Tree
 
         AddChildren();
         CleanEmptyNode();
-        s2 = AlgoProfile::CaptureClock();
-        AlgoProfile::GetInstance()->SetInsertTime(s1, s2);
     }
 
     std::pair<int, int> Tree::GenrateTask(int v)
@@ -816,19 +799,8 @@ namespace Tree
     {
         omp_set_num_threads(thread_num);
 
-        AlgoProfile::GetInstance()->SetStatus(AlgoProfile::REMOVE);
-
-        AlgoProfile::GetInstance()->SetRemoveEdgeNum((int)edg.size());
         std::vector<uint32_t> old_level = model_->GetLevels();
-
-        AlgoProfile::GetInstance()->SetOldMaxTriness(model_->GetMaxLevel());
-        auto s1 = AlgoProfile::CaptureClock();
         model_->Remove(edg);
-        auto s2 = AlgoProfile::CaptureClock();
-        AlgoProfile::GetInstance()->SetUpdateTrinessTime(s1, s2);
-        AlgoProfile::GetInstance()->SetNewMaxTriness(model_->GetMaxLevel());
-
-        s1 = AlgoProfile::CaptureClock();
 
         TreeBuildIndex pg(g_, model_->GetLevels().data());
 
@@ -1074,7 +1046,6 @@ namespace Tree
                             }
                         }
 
-                        // hclock::time_point s100 = hclock::now();
 
                         if (t_[split_tid[i]]->pa != -1)
                         {
@@ -1188,9 +1159,6 @@ namespace Tree
         // clear empty node
         CleanEmptyNode();
         // printf("phase9\n");
-        s2 = AlgoProfile::CaptureClock();
-
-        AlgoProfile::GetInstance()->SetRemoveTime(s1, s2);
     }
 
     void Tree::CleanEmptyNode()
@@ -1274,7 +1242,6 @@ namespace Tree
     bool Tree::check()
     {
 
-        AlgoProfile::GetInstance()->SetCorrect(false);
         int sum = 0;
         for (int i = 0; i < t_.size(); ++i)
         {
@@ -1300,10 +1267,7 @@ namespace Tree
         std::vector<uint32_t> cy_tid_;
         cy_t_.swap(t_);
         cy_tid_.swap(tid_);
-        auto s1 = AlgoProfile::CaptureClock();
         Build();
-        auto s2 = AlgoProfile::CaptureClock();
-        AlgoProfile::GetInstance()->SetRebuildTime(s1, s2);
         std::unordered_map<int, int> ump;
         for (int i = 0; i < tid_.size(); ++i)
         {
@@ -1326,7 +1290,6 @@ namespace Tree
             if (ump[pt1] != pt2)
                 return false;
         }
-        AlgoProfile::GetInstance()->SetCorrect(true);
         return true;
     }
 }

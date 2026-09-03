@@ -4,7 +4,6 @@
 #include <unordered_set>
 #include <iomanip>
 #include <queue>
-#include <chrono>
 #include <iostream>
 #include <mutex>
 #include <memory>
@@ -13,13 +12,10 @@
 #include "Trine.hpp"
 #include "CohesiveModel.hpp"
 #include "GraphUtils.h"
-#include "AlgoProfile.hpp"
 
 
 namespace Tree
 {
-
-	double get_time_s(hclock::time_point s, hclock::time_point t);
 
 	struct TreeNode
 	{
