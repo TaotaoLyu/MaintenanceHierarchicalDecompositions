@@ -61,7 +61,7 @@ namespace Tree
 		void SetThreadNum(int num);
 	private:
 		
-		void MoveToNewTid(std::vector<int> &changever, std::vector<int> &old_tid, std::vector<int> &old_trine);
+		void MoveToNewTid(std::vector<int> &changever, std::vector<int> &old_tid, std::vector<int> &old_level);
 		void AddChildren();
 		std::pair<int, int> GenrateTask(int v);
 		void PrintTree();

@@ -196,7 +196,7 @@ namespace Tree
     //         dfs(Jump, e, v);
     // }
 
-    void Tree::MoveToNewTid(std::vector<int> &changever, std::vector<int> &old_tid, std::vector<int> &old_trine)
+    void Tree::MoveToNewTid(std::vector<int> &changever, std::vector<int> &old_tid, std::vector<int> &old_level)
     {
         std::vector<std::vector<bool>> need_erase_vertex(thread_num, std::vector<bool>(t_.size()));
 
@@ -231,7 +231,7 @@ namespace Tree
                     t_.push_back(p);
                     changever.push_back(i);
                     old_tid.push_back(old_t);
-                    old_trine.push_back(old_k);
+                    old_level.push_back(old_k);
                 }
             }
         }
@@ -359,8 +359,8 @@ namespace Tree
         std::vector<int> changever;
 
         std::vector<int> old_tid;
-        std::vector<int> old_trine;
-        MoveToNewTid(changever, old_tid, old_trine);
+        std::vector<int> old_level;
+        MoveToNewTid(changever, old_tid, old_level);
 
 #pragma omp parallel for
         for (int i = 0; i < t_.size(); ++i)
@@ -385,7 +385,7 @@ namespace Tree
                 int v_tid = tid_[v];
                 if(flag) // modify
                 {
-                    if (t_[v_tid]->k > old_trine[i])
+                    if (t_[v_tid]->k > old_level[i])
                         bucket[cur_p][std::max(t_[u_tid]->k, t_[v_tid]->k)].push_back(std::make_pair(u_tid, v_tid));
                 }
                 else
@@ -648,22 +648,22 @@ namespace Tree
 
     std::pair<int, int> Tree::GenrateTask(int v)
     {
-        int new_v_trine = (*model_)[v];
+        int new_v_level = (*model_)[v];
         int tid = tid_[v];
-        int old_v_trine = t_[tid]->k;
-        if (new_v_trine == old_v_trine)
+        int old_v_level = t_[tid]->k;
+        if (new_v_level == old_v_level)
             return {-1, -1};
         int cur = tid;
         int parent = t_[cur]->pa;
-        while (parent != -1 && t_[parent]->k > new_v_trine)
+        while (parent != -1 && t_[parent]->k > new_v_level)
         {
             cur = parent;
             parent = t_[parent]->pa;
         }
-        if (parent != -1 && t_[parent]->k == new_v_trine)
+        if (parent != -1 && t_[parent]->k == new_v_level)
             return {-1, -1};
         else
-            return {cur, new_v_trine};
+            return {cur, new_v_level};
     }
     int Tree::FindCorrectTid(int v)
     {
@@ -828,7 +828,7 @@ namespace Tree
         AlgoProfile::GetInstance()->SetStatus(AlgoProfile::REMOVE);
 
         AlgoProfile::GetInstance()->SetRemoveEdgeNum((int)edg.size());
-        std::vector<uint32_t> old_trine_ = model_->GetLevels();
+        std::vector<uint32_t> old_level = model_->GetLevels();
 
         AlgoProfile::GetInstance()->SetOldMaxTriness(model_->GetMaxLevel());
         auto s1 = AlgoProfile::CaptureClock();
@@ -843,7 +843,7 @@ namespace Tree
 
         std::vector<uint32_t> change_ver;
         for (int i = 0; i < g_.GetNodeNum(); ++i)
-            if (old_trine_[i] != (*model_)[i])
+            if (old_level[i] != (*model_)[i])
                 change_ver.emplace_back(i);
 
         uint32_t thread_task_num = change_ver.size() / thread_num;
