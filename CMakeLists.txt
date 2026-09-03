@@ -20,28 +20,26 @@ option(
 find_package(OpenMP REQUIRED COMPONENTS CXX)
 
 add_library(mhd_core STATIC
-    src/analysis/AY.cpp
+    graph/Graph.cpp
     models/core/CoreTree.cpp
-    src/utils/GraphUtils.cpp
-    src/graph/ParaGraph.cpp
-    src/tree/TreeBuildIndex.cpp
-    src/profile/AlgoProfile.cpp
+    utils/src/GraphUtils.cpp
+    utils/src/Daemon.cpp
+    tree/src/TreeBuildIndex.cpp
     models/trine/Trine.cpp
-    src/tree/Tree.cpp
+    tree/src/Tree.cpp
     models/trine/detail/order.cpp
     models/trine/detail/thebin.cpp
     models/trine/detail/theheap.cpp
 
-    include/analysis/AY.hpp
     models/CohesiveModel.hpp
     models/core/CoreTree.hpp
     graph/Graph.hpp
-    graph/ParaGraph.hpp
-    include/tree/TreeBuildIndex.hpp
-    utils/GraphUtils.h
-    include/profile/AlgoProfile.hpp
+    tree/include/TreeBuildIndex.hpp
+    utils/include/GraphUtils.h
+    utils/include/Daemon.hpp
+    utils/include/Timing.hpp
     models/trine/Trine.hpp
-    include/tree/Tree.hpp
+    tree/include/Tree.hpp
     models/trine/detail/defs.h
     models/trine/detail/order.h
     models/trine/detail/thebin.h
@@ -52,15 +50,13 @@ target_compile_features(mhd_core PUBLIC cxx_std_14)
 
 target_include_directories(mhd_core
     PUBLIC
-        "${PROJECT_SOURCE_DIR}/include/analysis"
         "${PROJECT_SOURCE_DIR}/models"
         "${PROJECT_SOURCE_DIR}/models/core"
         "${PROJECT_SOURCE_DIR}/graph"
-        "${PROJECT_SOURCE_DIR}/utils"
-        "${PROJECT_SOURCE_DIR}/include/profile"
+        "${PROJECT_SOURCE_DIR}/utils/include"
         "${PROJECT_SOURCE_DIR}/models/trine"
         "${PROJECT_SOURCE_DIR}/models/trine/detail"
-        "${PROJECT_SOURCE_DIR}/include/tree"
+        "${PROJECT_SOURCE_DIR}/tree/include"
 )
 
 target_link_libraries(mhd_core
@@ -92,7 +88,14 @@ if(MHD_ENABLE_IPO)
 endif()
 
 add_executable(mhd
-    src/app/main.cpp
+    app/src/main.cpp
+    app/src/Benchmarks.cpp
+    app/include/Benchmarks.hpp
+)
+
+target_include_directories(mhd
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/app/include"
 )
 
 target_link_libraries(mhd

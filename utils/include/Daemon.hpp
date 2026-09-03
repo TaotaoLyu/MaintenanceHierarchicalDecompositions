@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace App
+namespace Utils
 {
     void StartDaemon(const std::string &log_filename);
 }

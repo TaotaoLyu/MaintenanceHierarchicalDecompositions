@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     }
 
     const std::string graph_filename = argv[1];
-    // App::StartDaemon("exp13.txt");
+    // Utils::StartDaemon("exp13.txt");
 
     Tree::Tree tree(graph_filename, kDefaultThreadCount);
 
