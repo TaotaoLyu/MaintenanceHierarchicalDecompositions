@@ -7,9 +7,11 @@
 #include <chrono>
 #include <iostream>
 #include <mutex>
+#include <memory>
 
 #include "Graph.hpp"
 #include "Trine.hpp"
+#include "CohesiveModel.hpp"
 #include "GraphUtils.h"
 #include "AlgoProfile.hpp"
 
@@ -34,17 +36,17 @@ namespace Tree
 	public:
 		Tree(const std::string &filename, int threadnum = 32)
 			: g_(filename),
-			  trine_(g_)
+			  model_(new Trine(g_))
 		{
-			trine_.Init(); // cal trine
+			model_->Init(); // cal trine
 			SetThreadNum(threadnum);
 		}
 		Tree(const Graph &pt)
 			: g_(pt),
-			  trine_(g_)
+			  model_(new Trine(g_))
 		{
 
-			trine_.Init();
+			model_->Init();
 		}
 
 		void Build(); // readlly build
@@ -78,6 +80,6 @@ namespace Tree
 		std::vector<uint32_t> tid_;
 	public:
 		Graph g_;
-		Trine trine_;
+		std::unique_ptr<CohesiveModel> model_;
 	};
 }

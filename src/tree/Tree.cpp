@@ -23,7 +23,7 @@ namespace Tree
     {
         omp_set_num_threads(thread_num);
 
-        TreeBuildIndex pg(g_, trine_.GetTriness().data());
+        TreeBuildIndex pg(g_, model_->GetLevels().data());
 
         int n = pg.g.GetNodeNum(); // modify
         tid_ = std::vector<uint32_t>(n, -1);
@@ -211,7 +211,7 @@ namespace Tree
         for (int i = 0; i < tid_.size(); ++i)
         {
             // printf("for start\n");
-            if (trine_[i] != copy_t_[tid_[i]]->k)
+            if ((*model_)[i] != copy_t_[tid_[i]]->k)
             {
                 int cur_p = omp_get_thread_num();
 
@@ -223,7 +223,7 @@ namespace Tree
                 // printf("hello\n");
                 auto p = new TreeNode;
                 p->vertex_.push_back(i);
-                p->k = trine_[i];
+                p->k = (*model_)[i];
                 p->pa = -1;
 #pragma omp critical(add_t)
                 {
@@ -247,7 +247,7 @@ namespace Tree
                     std::vector<int> new_vt;
                     for (auto e : t_[i]->vertex_)
                     {
-                        if (trine_[e] == t_[i]->k)
+                        if ((*model_)[e] == t_[i]->k)
                             new_vt.push_back(e);
                     }
                     new_vt.swap(t_[i]->vertex_);
@@ -346,12 +346,12 @@ namespace Tree
 
         AlgoProfile::GetInstance()->SetStatus(AlgoProfile::INSERT);
         AlgoProfile::GetInstance()->SetInsertEdgeNum((int)edg.size());
-        AlgoProfile::GetInstance()->SetOldMaxTriness(trine_.GetMaxTrine());
+        AlgoProfile::GetInstance()->SetOldMaxTriness(model_->GetMaxLevel());
         auto s1 = AlgoProfile::CaptureClock();
-        trine_.Insert(edg);
+        model_->Insert(edg);
         auto s2 = AlgoProfile::CaptureClock();
         AlgoProfile::GetInstance()->SetUpdateTrinessTime(s1, s2);
-        AlgoProfile::GetInstance()->SetNewMaxTriness(trine_.GetMaxTrine());
+        AlgoProfile::GetInstance()->SetNewMaxTriness(model_->GetMaxLevel());
 
         s1 = AlgoProfile::CaptureClock();
 
@@ -370,9 +370,9 @@ namespace Tree
                 t_[i]->pa = t_[t_[i]->pa]->vertex_.front();
             }
         }
-        std::vector<std::vector<std::pair<int, int>>> merged_bucket(trine_.GetMaxTrine() + 1);
+        std::vector<std::vector<std::pair<int, int>>> merged_bucket(model_->GetMaxLevel() + 1);
 
-        std::vector<std::vector<std::vector<std::pair<int, int>>>> bucket(thread_num, std::vector<std::vector<std::pair<int, int>>>(trine_.GetMaxTrine() + 1));
+        std::vector<std::vector<std::vector<std::pair<int, int>>>> bucket(thread_num, std::vector<std::vector<std::pair<int, int>>>(model_->GetMaxLevel() + 1));
 
 #pragma omp parallel for
         for (int i = 0; i < changever.size(); ++i)
@@ -417,7 +417,7 @@ namespace Tree
         }
 
 #pragma omp parallel for
-        for (int i = 0; i <= trine_.GetMaxTrine(); ++i)
+        for (int i = 0; i <= model_->GetMaxLevel(); ++i)
         {
             std::vector<std::pair<int, int>> k_vedge;
             std::unordered_set<uint64_t> global_seen;
@@ -447,7 +447,7 @@ namespace Tree
             merged_bucket[i].swap(k_vedge);
         }
 
-        TreeBuildIndex pg(g_, trine_.GetTriness().data());
+        TreeBuildIndex pg(g_, model_->GetLevels().data());
 
         WaitFreeRankDSU dsu_(g_.GetNodeNum(), pg.rank_);
         std::vector<int> visted(t_.size());
@@ -455,39 +455,9 @@ namespace Tree
         std::vector<std::vector<int>> add_edge(t_.size());
 
         std::vector<std::mutex> mt_node(t_.size());
-        // std::vector<std::mutex> mt_k(trine_.GetMaxTrine() + 1);
-        int k = trine_.GetMaxTrine();
-        // printf("start k\n");
+        // std::vector<std::mutex> mt_k(model_->GetMaxLevel() + 1);
+        int k = model_->GetMaxLevel();
 
-        // {
-        //     int cc=0;
-        //     for(auto e:merged_bucket)
-        //     {
-        //         for(auto pq:e)
-        //         {
-        //             int n1=pq.first;
-        //             int n2=pq.second;
-        //             if(t_[n1]->k<t_[n2]->k)
-        //                 std::swap(n1,n2);
-
-        //             // assert(n1 >= 0 && n1 < t_.size());
-        //             // assert(n2 >= 0 && n2 < t_.size());
-        //             while (t_[n1]->k>t_[n2]->k)
-        //             {
-        //                 cc++;
-        //                 n1=tid_[t_[n1]->pa];
-        //                 if(n1==-1)
-        //                     break;
-        //             }
-        //         }
-        //     }
-
-        //     printf("=====================\n");
-        //     printf("cc= %d\n",cc);
-        //     printf("=====================\n");
-        // }
-
-        // printf("=====================\n");
 
 
 
@@ -678,7 +648,7 @@ namespace Tree
 
     std::pair<int, int> Tree::GenrateTask(int v)
     {
-        int new_v_trine = trine_[v];
+        int new_v_trine = (*model_)[v];
         int tid = tid_[v];
         int old_v_trine = t_[tid]->k;
         if (new_v_trine == old_v_trine)
@@ -697,7 +667,7 @@ namespace Tree
     }
     int Tree::FindCorrectTid(int v)
     {
-        int k = trine_[v];
+        int k = (*model_)[v];
         int cur = tid_[v];
         while (t_[cur]->k != k)
         {
@@ -820,7 +790,7 @@ namespace Tree
                     newvt.reserve(vt.size());
                     for (int h = 0; h < vt.size(); ++h)
                     {
-                        if (trine_[vt[h]] == t_[i]->k)
+                        if ((*model_)[vt[h]] == t_[i]->k)
                         {
                             newvt.push_back(vt[h]);
                         }
@@ -858,26 +828,27 @@ namespace Tree
         AlgoProfile::GetInstance()->SetStatus(AlgoProfile::REMOVE);
 
         AlgoProfile::GetInstance()->SetRemoveEdgeNum((int)edg.size());
-        std::vector<uint32_t> old_trine_ = trine_.GetTriness();
+        std::vector<uint32_t> old_trine_ = model_->GetLevels();
 
-        AlgoProfile::GetInstance()->SetOldMaxTriness(trine_.GetMaxTrine());
+        AlgoProfile::GetInstance()->SetOldMaxTriness(model_->GetMaxLevel());
         auto s1 = AlgoProfile::CaptureClock();
-        trine_.Remove(edg);
+        model_->Remove(edg);
         auto s2 = AlgoProfile::CaptureClock();
         AlgoProfile::GetInstance()->SetUpdateTrinessTime(s1, s2);
-        AlgoProfile::GetInstance()->SetNewMaxTriness(trine_.GetMaxTrine());
+        AlgoProfile::GetInstance()->SetNewMaxTriness(model_->GetMaxLevel());
 
         s1 = AlgoProfile::CaptureClock();
 
-        TreeBuildIndex pg(g_, trine_.GetTriness().data());
+        TreeBuildIndex pg(g_, model_->GetLevels().data());
 
         std::vector<uint32_t> change_ver;
         for (int i = 0; i < g_.GetNodeNum(); ++i)
-            if (old_trine_[i] != trine_[i])
+            if (old_trine_[i] != (*model_)[i])
                 change_ver.emplace_back(i);
 
         uint32_t thread_task_num = change_ver.size() / thread_num;
-        std::vector<std::vector<std::vector<int>>> need_split(thread_num, std::vector<std::vector<int>>(trine_.GetMaxTrine() + 1));
+        // may have some problems
+        std::vector<std::vector<std::vector<int>>> need_split(thread_num, std::vector<std::vector<int>>(model_->GetMaxLevel() + 1));
 
         int node_num = (int)t_.size();
         // printf("old num: %d\n", node_num);
@@ -902,7 +873,7 @@ namespace Tree
 
             // printf("i: %d\n", i);
             int u = change_ver[i];
-            int newk = trine_[u];
+            int newk = (*model_)[u];
             int curid = tid_[u];
             // printf("crr id: %d\n", curid);
             // printf("new_k %d\n", newk);
@@ -931,19 +902,19 @@ namespace Tree
         {
             int u = e.first;
             int v = e.second;
-            if (trine_[u] > trine_[v])
+            if ((*model_)[u] > (*model_)[v])
                 std::swap(u, v);
-            need_split[omp_get_thread_num()][trine_[u]].push_back(tid_[u]);
+            need_split[omp_get_thread_num()][(*model_)[u]].push_back(tid_[u]);
             need_transmit[tid_[u]] = true;
         }
         // printf("phase7\n");
 
         // split node down to up
-        int cur_k = trine_.GetMaxTrine();
+        // int cur_k = model_->GetMaxLevel();
         std::vector<std::vector<TreeNode *>> push_to_chil(t_.size());
         WaitFreeRankDSU dsu_(g_.GetNodeNum(), pg.rank_);
         VI tag(g_.GetNodeNum(), -1);
-        for (int cur_k = trine_.GetMaxTrine(); cur_k >= 0; cur_k--)
+        for (int cur_k = model_->GetMaxLevel(); cur_k >= 0; cur_k--)
         {
             // printf("%d\n", cur_k);
             std::vector<bool> vised_(t_.size());
@@ -1049,7 +1020,7 @@ namespace Tree
                                 for (auto v : g_[u])
                                 {
 
-                                    if (trine_[v] > cur_k)
+                                    if ((*model_)[v] > cur_k)
                                     {
                                         int pivot = Jump[tid_[v]];
 
@@ -1060,7 +1031,7 @@ namespace Tree
                                         }
                                         dsu_.joint(u, dsu_.get_pivot(pivot));
                                     }
-                                    else if (trine_[v] == cur_k)
+                                    else if ((*model_)[v] == cur_k)
                                     {
 
                                         int pivot = dsu_.get_pivot(v);
